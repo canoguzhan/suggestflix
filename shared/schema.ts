@@ -73,6 +73,26 @@ export const tmdbMovieSchema = z.object({
       name: z.string(),
     })
   ).optional(),
+  watch_providers: z.object({
+    results: z.record(z.object({
+      link: z.string(),
+      flatrate: z.array(z.object({
+        provider_id: z.number(),
+        provider_name: z.string(),
+        logo_path: z.string(),
+      })).optional(),
+      rent: z.array(z.object({
+        provider_id: z.number(),
+        provider_name: z.string(),
+        logo_path: z.string(),
+      })).optional(),
+      buy: z.array(z.object({
+        provider_id: z.number(),
+        provider_name: z.string(),
+        logo_path: z.string(),
+      })).optional(),
+    }))
+  }).optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

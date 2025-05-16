@@ -49,10 +49,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error(`TMDB API error fetching details: ${detailsResponse.status}`);
       }
       
+      // Fetch watch providers
+      const watchProvidersResponse = await fetch(
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}/watch/providers?api_key=${TMDB_API_KEY}`
+      );
+      
+      if (!watchProvidersResponse.ok) {
+        throw new Error(`TMDB API error fetching watch providers: ${watchProvidersResponse.status}`);
+      }
+      
       const movieDetails = await detailsResponse.json();
+      const watchProvidersData = await watchProvidersResponse.json();
+      
+      // Combine movie details with watch providers data
+      const movieWithProviders = {
+        ...movieDetails,
+        watch_providers: watchProvidersData
+      };
       
       // Parse and validate the movie data
-      const validatedMovie = tmdbMovieSchema.parse(movieDetails);
+      const validatedMovie = tmdbMovieSchema.parse(movieWithProviders);
       
       // Store the movie in our database if it doesn't exist
       let storedMovie = await storage.getMovieByTmdbId(validatedMovie.id);
