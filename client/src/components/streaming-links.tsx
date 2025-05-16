@@ -18,8 +18,15 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
   const { t } = useTranslation();
   const userCountry = navigator.language.split('-')[1]?.toLowerCase() || 'us';
   
+  // Debug logging
+  console.log('Movie watch providers:', movie.watch_providers);
+  console.log('User country:', userCountry);
+  
   // Get providers for user's country
   const countryProviders = movie.watch_providers?.results[userCountry];
+  
+  // Debug logging
+  console.log('Country providers:', countryProviders);
   
   if (!countryProviders) {
     return null;
@@ -31,6 +38,9 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
     ...(countryProviders.rent || []),
     ...(countryProviders.buy || [])
   ];
+
+  // Debug logging
+  console.log('All providers:', allProviders);
 
   // Remove duplicates based on provider_id
   const uniqueProviders = allProviders.filter((provider, index, self) =>

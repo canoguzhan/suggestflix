@@ -71,6 +71,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
               </a>
             </Button>
           </div>
+
+          <StreamingLinks movie={movie} />
         </CardContent>
       </div>
     </Card>
