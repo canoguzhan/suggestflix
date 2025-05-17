@@ -42,29 +42,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch additional details for the movie in the requested language
       const detailsResponse = await fetch(
-        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}`
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}&append_to_response=watch/providers`
       );
       
       if (!detailsResponse.ok) {
         throw new Error(`TMDB API error fetching details: ${detailsResponse.status}`);
       }
       
-      // Fetch watch providers
-      const watchProvidersResponse = await fetch(
-        `https://api.themoviedb.org/3/movie/${randomMovie.id}/watch/providers?api_key=${TMDB_API_KEY}`
-      );
-      
-      if (!watchProvidersResponse.ok) {
-        throw new Error(`TMDB API error fetching watch providers: ${watchProvidersResponse.status}`);
-      }
-      
       const movieDetails = await detailsResponse.json();
-      const watchProvidersData = await watchProvidersResponse.json();
       
-      // Combine movie details with watch providers data
+      // Transform watch/providers data to match our schema
       const movieWithProviders = {
         ...movieDetails,
-        watch_providers: watchProvidersData
+        watch_providers: movieDetails['watch/providers']
       };
       
       // Parse and validate the movie data
@@ -80,15 +70,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           posterPath: validatedMovie.poster_path,
           releaseDate: validatedMovie.release_date,
           overview: validatedMovie.overview,
-          voteAverage: validatedMovie.vote_average.toString(),
+          voteAverage: validatedMovie.vote_average.toString()
         });
         
         storedMovie = await storage.createMovie(movieToInsert);
-        
-        // Add to history (without user association for now)
         await storage.addMovieToHistory({ movieId: storedMovie.id });
       } else {
-        // Add to history if it already exists (without user association for now)
         await storage.addMovieToHistory({ movieId: storedMovie.id });
       }
       
