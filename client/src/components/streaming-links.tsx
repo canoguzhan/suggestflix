@@ -34,40 +34,63 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
     return null;
   }
 
-  // Combine all provider types
-  const allProviders = [
-    ...(countryProviders.flatrate || []),
-    ...(countryProviders.rent || []),
-    ...(countryProviders.buy || [])
-  ];
+  // Group providers by type
+  const streamingProviders = countryProviders.flatrate || [];
+  const rentProviders = countryProviders.rent || [];
+  const buyProviders = countryProviders.buy || [];
 
-  // Debug logging
-  console.log('All providers before deduplication:', allProviders);
-
-  // Remove duplicates based on provider_id
-  const uniqueProviders = allProviders.filter((provider, index, self) =>
-    index === self.findIndex((p) => p.provider_id === provider.provider_id)
-  );
-
-  console.log('Unique providers after deduplication:', uniqueProviders);
-
-  if (uniqueProviders.length === 0) {
-    console.log('No unique providers found after deduplication');
+  // If no providers at all, return null
+  if (streamingProviders.length === 0 && rentProviders.length === 0 && buyProviders.length === 0) {
+    console.log('No providers available');
     return null;
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-2">{t('streaming.title')}</h3>
-      <div className="flex flex-wrap gap-2">
-        {uniqueProviders.map((provider) => (
-          <StreamingButton 
-            key={provider.provider_id} 
-            provider={provider}
-            watchUrl={countryProviders.link}
-          />
-        ))}
-      </div>
+    <div className="mt-6 space-y-4">
+      {streamingProviders.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{t('streaming.title')}</h3>
+          <div className="flex flex-wrap gap-2">
+            {streamingProviders.map((provider) => (
+              <StreamingButton 
+                key={provider.provider_id} 
+                provider={provider}
+                watchUrl={countryProviders.link}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {rentProviders.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{t('streaming.rent')}</h3>
+          <div className="flex flex-wrap gap-2">
+            {rentProviders.map((provider) => (
+              <StreamingButton 
+                key={provider.provider_id} 
+                provider={provider}
+                watchUrl={countryProviders.link}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {buyProviders.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{t('streaming.buy')}</h3>
+          <div className="flex flex-wrap gap-2">
+            {buyProviders.map((provider) => (
+              <StreamingButton 
+                key={provider.provider_id} 
+                provider={provider}
+                watchUrl={countryProviders.link}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

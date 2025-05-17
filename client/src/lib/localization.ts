@@ -35,7 +35,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.year': 'Year',
     'movie.runtime': 'min',
     'movie.viewTmdb': 'View on TMDB',
-    'streaming.title': 'Watch On',
+    'streaming.title': 'Stream On',
+    'streaming.rent': 'Rent From',
+    'streaming.buy': 'Buy From',
     
     // Footer
     'footer.copyright': '© {year} SuggestFlix',
@@ -52,6 +54,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.runtime': 'min',
     'movie.viewTmdb': 'Ver en TMDB',
     'streaming.title': 'Ver En',
+    'streaming.rent': 'Alquilar De',
+    'streaming.buy': 'Comprar De',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': 'Desarrollado con la API de TMDB'
   },
@@ -66,6 +70,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.runtime': 'min',
     'movie.viewTmdb': 'Voir sur TMDB',
     'streaming.title': 'Regarder Sur',
+    'streaming.rent': 'Louer De',
+    'streaming.buy': 'Acheter De',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': 'Propulsé par l\'API TMDB'
   },
@@ -80,6 +86,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.runtime': 'min',
     'movie.viewTmdb': 'Auf TMDB ansehen',
     'streaming.title': 'Ansehen Auf',
+    'streaming.rent': 'Ausleihen Von',
+    'streaming.buy': 'Kaufen Von',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': 'Unterstützt durch die TMDB API'
   },
@@ -94,6 +102,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.runtime': '分',
     'movie.viewTmdb': 'TMDBで見る',
     'streaming.title': '視聴する',
+    'streaming.rent': 'レンタルする',
+    'streaming.buy': '購入する',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': 'TMDB APIを使用'
   },
@@ -108,6 +118,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'movie.runtime': '分钟',
     'movie.viewTmdb': '在TMDB上查看',
     'streaming.title': '观看于',
+    'streaming.rent': '租赁于',
+    'streaming.buy': '购买于',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': '由TMDB API提供支持'
   }

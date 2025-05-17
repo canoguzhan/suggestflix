@@ -42,19 +42,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch additional details for the movie in the requested language
       const detailsResponse = await fetch(
-        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}&append_to_response=watch_providers`
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}`
       );
       
       if (!detailsResponse.ok) {
         throw new Error(`TMDB API error fetching details: ${detailsResponse.status}`);
       }
+
+      // Fetch watch providers separately
+      const watchProvidersResponse = await fetch(
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}/watch/providers?api_key=${TMDB_API_KEY}`
+      );
+      
+      if (!watchProvidersResponse.ok) {
+        throw new Error(`TMDB API error fetching watch providers: ${watchProvidersResponse.status}`);
+      }
       
       const movieDetails = await detailsResponse.json();
+      const watchProvidersData = await watchProvidersResponse.json();
       
-      // Transform watch/providers data to match our schema
+      // Combine movie details with watch providers data
       const movieWithProviders = {
         ...movieDetails,
-        watch_providers: movieDetails.watch_providers
+        watch_providers: watchProvidersData
       };
       
       // Parse and validate the movie data
