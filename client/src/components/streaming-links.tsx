@@ -19,29 +19,31 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
   const [userCountry, setUserCountry] = useState<string>('US');
 
   useEffect(() => {
-    // Try to get user's country using the Geolocation API
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        if (data.country_code) {
-          setUserCountry(data.country_code.toUpperCase());
-        }
-      })
-      .catch(err => {
-        console.log('Could not detect country, falling back to browser language');
-        // Fallback to browser language
-        const langCountry = navigator.language.split('-')[1];
-        if (langCountry) {
-          setUserCountry(langCountry.toUpperCase());
-        }
-      });
-  }, []);
+    // Map language to country code
+    const languageToCountry: Record<string, string> = {
+      en: 'US',
+      es: 'ES',
+      fr: 'FR',
+      de: 'DE',
+      ja: 'JP',
+      zh: 'CN',
+      tr: 'TR'
+    };
+
+    // Set country based on selected language
+    setUserCountry(languageToCountry[language] || 'US');
+  }, [language]);
   
   // Get providers for user's country
   const countryProviders = movie.watch_providers?.results?.[userCountry];
   
   if (!countryProviders) {
-    console.log('No providers found for country:', userCountry);
+    // Only log if there are no providers for the current country
+    if (movie.watch_providers?.results && Object.keys(movie.watch_providers.results).length > 0) {
+      // Get available countries
+      const availableCountries = Object.keys(movie.watch_providers.results).join(', ');
+      console.log(`No providers found for ${userCountry}. Available in: ${availableCountries}`);
+    }
     return null;
   }
 
