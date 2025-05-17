@@ -61,11 +61,17 @@ export function useFavorites() {
     },
   });
 
+  // Check if a movie is in favorites
+  const isFavorite = (movieId: number): boolean => {
+    return favorites.some(favorite => favorite.movieId === movieId);
+  };
+
   return {
     favorites,
     isLoading,
     isError,
     error,
     toggleFavorite,
+    isFavorite,
   };
 }
