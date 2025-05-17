@@ -139,10 +139,10 @@ function StreamingButton({ provider, movieTitle }: StreamingButtonProps) {
   // Get the search URL for this provider
   const searchUrl = providerSearchUrls[provider.provider_id];
   
-  // If we don't have a search URL for this provider, use TMDB
+  // If we don't have a search URL for this provider, use Google search
   const url = searchUrl 
     ? `${searchUrl}${encodeURIComponent(movieTitle)}`
-    : `https://www.themoviedb.org/movie/providers`;
+    : `https://www.google.com/search?q=${encodeURIComponent(`${movieTitle} watch on ${provider.provider_name}`)}`;
 
   return (
     <a 
