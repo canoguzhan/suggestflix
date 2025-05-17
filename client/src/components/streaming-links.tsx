@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TmdbMovie } from '@shared/schema';
 import { Film, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,48 +12,68 @@ interface Provider {
   provider_id: number;
   provider_name: string;
   logo_path: string;
-  provider_url?: string;
 }
 
 export default function StreamingLinks({ movie }: StreamingLinksProps) {
-  const { t } = useTranslation();
-  const userCountry = navigator.language.split('-')[1]?.toLowerCase() || 'us';
-  
-  // Debug logging
-  console.log('Full movie data:', movie);
-  console.log('Watch providers data:', movie.watch_providers);
-  console.log('User country:', userCountry);
+  const { t, language } = useTranslation();
+  const [userCountry, setUserCountry] = useState<string>('US');
+
+  useEffect(() => {
+    // Try to get user's country using the Geolocation API
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.country_code) {
+          setUserCountry(data.country_code.toUpperCase());
+        }
+      })
+      .catch(err => {
+        console.log('Could not detect country, falling back to browser language');
+        // Fallback to browser language
+        const langCountry = navigator.language.split('-')[1];
+        if (langCountry) {
+          setUserCountry(langCountry.toUpperCase());
+        }
+      });
+  }, []);
   
   // Get providers for user's country
-  const countryProviders = movie.watch_providers?.results?.[userCountry.toUpperCase()];
-  
-  // Debug logging
-  console.log('Country providers:', countryProviders);
+  const countryProviders = movie.watch_providers?.results?.[userCountry];
   
   if (!countryProviders) {
     console.log('No providers found for country:', userCountry);
     return null;
   }
 
-  // Group providers by type and add URLs
-  const streamingProviders = (countryProviders.flatrate || []).map(provider => ({
-    ...provider,
-    provider_url: countryProviders.link
-  }));
-  const rentProviders = (countryProviders.rent || []).map(provider => ({
-    ...provider,
-    provider_url: countryProviders.link
-  }));
-  const buyProviders = (countryProviders.buy || []).map(provider => ({
-    ...provider,
-    provider_url: countryProviders.link
-  }));
+  // Group providers by type
+  const streamingProviders = countryProviders.flatrate || [];
+  const rentProviders = countryProviders.rent || [];
+  const buyProviders = countryProviders.buy || [];
 
   // If no providers at all, return null
   if (streamingProviders.length === 0 && rentProviders.length === 0 && buyProviders.length === 0) {
-    console.log('No providers available');
     return null;
   }
+
+  // Get the appropriate TMDB domain based on language
+  const getTmdbDomain = () => {
+    const langToDomain: Record<string, string> = {
+      tr: 'www.themoviedb.org/tr',
+      en: 'www.themoviedb.org',
+      es: 'www.themoviedb.org/es',
+      fr: 'www.themoviedb.org/fr',
+      de: 'www.themoviedb.org/de',
+      ja: 'www.themoviedb.org/ja',
+      zh: 'www.themoviedb.org/zh'
+    };
+    return langToDomain[language] || 'www.themoviedb.org';
+  };
+
+  // Convert TMDB URL to localized version
+  const getLocalizedTmdbUrl = (url: string) => {
+    const tmdbDomain = getTmdbDomain();
+    return url.replace('www.themoviedb.org', tmdbDomain);
+  };
 
   return (
     <div className="mt-6 space-y-4">
@@ -65,6 +85,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
+                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
               />
             ))}
           </div>
@@ -79,6 +100,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
+                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
               />
             ))}
           </div>
@@ -93,6 +115,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
+                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
               />
             ))}
           </div>
@@ -104,12 +127,13 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
 
 interface StreamingButtonProps {
   provider: Provider;
+  watchUrl: string;
 }
 
-function StreamingButton({ provider }: StreamingButtonProps) {
+function StreamingButton({ provider, watchUrl }: StreamingButtonProps) {
   return (
     <a 
-      href={provider.provider_url} 
+      href={watchUrl} 
       target="_blank" 
       rel="noopener noreferrer"
       className="inline-block"

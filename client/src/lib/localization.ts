@@ -1,5 +1,5 @@
 // Available languages
-export type Language = 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
+export type Language = 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh' | 'tr';
 
 // Default language
 export const DEFAULT_LANGUAGE: Language = 'en';
@@ -13,7 +13,7 @@ export function detectLanguage(): Language {
   const browserLang = navigator.language.split('-')[0];
   
   // Check if browserLang is one of our supported languages
-  if (['en', 'es', 'fr', 'de', 'ja', 'zh'].includes(browserLang)) {
+  if (['en', 'es', 'fr', 'de', 'ja', 'zh', 'tr'].includes(browserLang)) {
     return browserLang as Language;
   }
   
@@ -122,6 +122,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'streaming.buy': '购买于',
     'footer.copyright': '© {year} SuggestFlix',
     'footer.poweredBy': '由TMDB API提供支持'
+  },
+  tr: {
+    'discover.title': 'Yeni Favori Filminizi Keşfedin',
+    'discover.description': 'Rastgele bir film önerisi almak için aşağıdaki düğmeye tıklayın. Her gün yeni bir film keşfedin!',
+    'suggest.button': 'Film Öner',
+    'error.title': 'Hay aksi! Bir şeyler ters gitti',
+    'error.message': 'Film önerisi alamadık. Lütfen daha sonra tekrar deneyin.',
+    'error.button': 'Tekrar Dene',
+    'movie.year': 'Yıl',
+    'movie.runtime': 'dk',
+    'movie.viewTmdb': 'TMDB\'de Görüntüle',
+    'streaming.title': 'İzleme Seçenekleri',
+    'streaming.rent': 'Kiralama Seçenekleri',
+    'streaming.buy': 'Satın Alma Seçenekleri',
+    'footer.copyright': '© {year} SuggestFlix',
+    'footer.poweredBy': 'TMDB API ile güçlendirilmiştir'
   }
 };
 
