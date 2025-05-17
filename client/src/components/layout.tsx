@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useTranslation } from "@/lib/localization";
 import { Link } from "wouter";
+import LanguageSelector from "@/components/language-selector";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -50,9 +51,7 @@ export default function Layout({ children }: LayoutProps) {
               <Heart className="h-5 w-5" />
               <span className="hidden md:inline">Favorites</span>
             </Link>
-            <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded uppercase">
-              {language}
-            </span>
+            <LanguageSelector />
             {themeButton}
           </nav>
         </div>

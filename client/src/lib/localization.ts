@@ -1,3 +1,6 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
 // Available languages
 export type Language = 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh' | 'tr';
 
@@ -19,6 +22,24 @@ export function detectLanguage(): Language {
   
   return DEFAULT_LANGUAGE;
 }
+
+interface LanguageState {
+  language: Language;
+  setLanguage: (language: Language) => void;
+}
+
+// Create a store for language state
+export const useLanguageStore = create<LanguageState>()(
+  persist(
+    (set) => ({
+      language: detectLanguage(),
+      setLanguage: (language: Language) => set({ language }),
+    }),
+    {
+      name: 'language-storage',
+    }
+  )
+);
 
 // Translation strings
 export const translations: Record<Language, Record<string, string>> = {
@@ -143,7 +164,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
 // Create a function to get translations
 export function useTranslation() {
-  const language = detectLanguage();
+  const { language, setLanguage } = useLanguageStore();
   
   const t = (key: string, replacements: Record<string, string | number> = {}) => {
     let text = translations[language][key] || translations[DEFAULT_LANGUAGE][key] || key;
@@ -158,6 +179,7 @@ export function useTranslation() {
   
   return {
     t,
-    language
+    language,
+    setLanguage
   };
 }
