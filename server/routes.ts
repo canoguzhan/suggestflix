@@ -42,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch additional details for the movie in the requested language
       const detailsResponse = await fetch(
-        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}&append_to_response=watch/providers`
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}?api_key=${TMDB_API_KEY}&language=${language}&append_to_response=watch_providers`
       );
       
       if (!detailsResponse.ok) {
@@ -54,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transform watch/providers data to match our schema
       const movieWithProviders = {
         ...movieDetails,
-        watch_providers: movieDetails['watch/providers']
+        watch_providers: movieDetails.watch_providers
       };
       
       // Parse and validate the movie data

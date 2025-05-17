@@ -19,16 +19,18 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
   const userCountry = navigator.language.split('-')[1]?.toLowerCase() || 'us';
   
   // Debug logging
-  console.log('Movie watch providers:', movie.watch_providers);
+  console.log('Full movie data:', movie);
+  console.log('Watch providers data:', movie.watch_providers);
   console.log('User country:', userCountry);
   
   // Get providers for user's country
-  const countryProviders = movie.watch_providers?.results[userCountry];
+  const countryProviders = movie.watch_providers?.results?.[userCountry];
   
   // Debug logging
   console.log('Country providers:', countryProviders);
   
   if (!countryProviders) {
+    console.log('No providers found for country:', userCountry);
     return null;
   }
 
@@ -40,14 +42,17 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
   ];
 
   // Debug logging
-  console.log('All providers:', allProviders);
+  console.log('All providers before deduplication:', allProviders);
 
   // Remove duplicates based on provider_id
   const uniqueProviders = allProviders.filter((provider, index, self) =>
     index === self.findIndex((p) => p.provider_id === provider.provider_id)
   );
 
+  console.log('Unique providers after deduplication:', uniqueProviders);
+
   if (uniqueProviders.length === 0) {
+    console.log('No unique providers found after deduplication');
     return null;
   }
 
