@@ -6,30 +6,28 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import Favorites from "@/pages/favorites";
 import Layout from "@/components/layout";
 
 function Router() {
-  return React.createElement(
-    Layout,
-    null,
-    React.createElement(Switch, null,
-      React.createElement(Route, { path: "/", component: Home }),
-      React.createElement(Route, { component: NotFound })
-    )
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/favorites" component={Favorites} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
-function App() {
-  return React.createElement(
-    QueryClientProvider,
-    { client: queryClient },
-    React.createElement(
-      TooltipProvider,
-      null,
-      React.createElement(Toaster, null),
-      React.createElement(Router, null)
-    )
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router />
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
-
-export default App;

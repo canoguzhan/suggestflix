@@ -1,10 +1,11 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Heart, HeartOff } from "lucide-react";
 import { TmdbMovie } from "@shared/schema";
 import { useTranslation } from "@/lib/localization";
 import StreamingLinks from "@/components/streaming-links";
+import { useFavorites } from "@/hooks/use-favorites";
 
 interface MovieCardProps {
   movie: TmdbMovie & { storedId: number };
@@ -12,6 +13,7 @@ interface MovieCardProps {
 
 export default function MovieCard({ movie }: MovieCardProps) {
   const { t } = useTranslation();
+  const { favorites, toggleFavorite } = useFavorites();
   
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
@@ -20,6 +22,9 @@ export default function MovieCard({ movie }: MovieCardProps) {
   // Format release date
   const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "Unknown";
   
+  // Check if movie is in favorites
+  const isFavorite = favorites.some(fav => fav.movieId === movie.storedId);
+
   return (
     <Card id="movieCard" className="max-w-4xl mx-auto bg-white dark:bg-secondary rounded-xl shadow-lg overflow-hidden mb-12">
       <div className="flex flex-col md:flex-row">
@@ -33,10 +38,28 @@ export default function MovieCard({ movie }: MovieCardProps) {
         <CardContent className="p-6 md:w-2/3">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-2xl font-bold text-secondary dark:text-white">{movie.title}</h3>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <span className="bg-primary text-white py-1 px-2 rounded-lg text-sm font-bold">
                 {movie.vote_average?.toFixed(1)}
               </span>
+              <Button
+                variant={isFavorite ? "destructive" : "secondary"}
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => toggleFavorite(movie.storedId)}
+              >
+                {isFavorite ? (
+                  <>
+                    <HeartOff size={16} />
+                    <span className="sr-only">Remove from Favorites</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart size={16} />
+                    <span className="sr-only">Add to Favorites</span>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
