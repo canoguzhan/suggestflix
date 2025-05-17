@@ -20,7 +20,7 @@ const providerSearchUrls: Record<number, string> = {
   9: 'https://www.primevideo.com/search/?phrase=', // Prime Video
   337: 'https://www.disneyplus.com/search?q=', // Disney+
   384: 'https://www.hbomax.com/search?q=', // HBO Max
-  350: 'https://www.apple.com/us/search/', // Apple TV
+  350: 'https://tv.apple.com/search?term=', // Apple TV
   2: 'https://www.apple.com/us/search/', // Apple iTunes
   3: 'https://play.google.com/store/search?q=', // Google Play
   283: 'https://www.crunchyroll.com/search?q=', // Crunchyroll
