@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "next": "^14.0.0",
+    "cookies-next": "^4.1.0"
+  }
+} 
