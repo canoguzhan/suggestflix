@@ -14,6 +14,29 @@ interface Provider {
   logo_path: string;
 }
 
+// Provider ID to search URL mapping
+const providerSearchUrls: Record<number, string> = {
+  8: 'https://www.netflix.com/search?q=', // Netflix
+  9: 'https://www.primevideo.com/search/?phrase=', // Prime Video
+  337: 'https://www.disneyplus.com/search?q=', // Disney+
+  384: 'https://www.hbomax.com/search?q=', // HBO Max
+  350: 'https://www.apple.com/us/search/', // Apple TV
+  2: 'https://www.apple.com/us/search/', // Apple iTunes
+  3: 'https://play.google.com/store/search?q=', // Google Play
+  283: 'https://www.crunchyroll.com/search?q=', // Crunchyroll
+  257: 'https://www.fubo.tv/search/', // FuboTV
+  387: 'https://www.peacocktv.com/search?q=', // Peacock
+  157: 'https://hulu.com/search?q=', // Hulu
+  11: 'https://mubi.com/search/', // MUBI
+  188: 'https://www.youtube.com/results?search_query=', // YouTube
+  190: 'https://www.youtube.com/results?search_query=', // YouTube Premium
+  237: 'https://www.amazon.com/s?k=', // Amazon Video
+  372: 'https://www.microsoft.com/en-us/search/shop/movies?q=', // Microsoft Store
+  371: 'https://www.apple.com/us/search/', // Apple TV+
+  442: 'https://www.paramountplus.com/search/?q=', // Paramount+
+  // Add more providers as needed
+};
+
 export default function StreamingLinks({ movie }: StreamingLinksProps) {
   const { t, language } = useTranslation();
   const [userCountry, setUserCountry] = useState<string>('US');
@@ -57,26 +80,6 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
     return null;
   }
 
-  // Get the appropriate TMDB domain based on language
-  const getTmdbDomain = () => {
-    const langToDomain: Record<string, string> = {
-      tr: 'www.themoviedb.org/tr',
-      en: 'www.themoviedb.org',
-      es: 'www.themoviedb.org/es',
-      fr: 'www.themoviedb.org/fr',
-      de: 'www.themoviedb.org/de',
-      ja: 'www.themoviedb.org/ja',
-      zh: 'www.themoviedb.org/zh'
-    };
-    return langToDomain[language] || 'www.themoviedb.org';
-  };
-
-  // Convert TMDB URL to localized version
-  const getLocalizedTmdbUrl = (url: string) => {
-    const tmdbDomain = getTmdbDomain();
-    return url.replace('www.themoviedb.org', tmdbDomain);
-  };
-
   return (
     <div className="mt-6 space-y-4">
       {streamingProviders.length > 0 && (
@@ -87,7 +90,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
+                movieTitle={movie.title}
               />
             ))}
           </div>
@@ -102,7 +105,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
+                movieTitle={movie.title}
               />
             ))}
           </div>
@@ -117,7 +120,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={getLocalizedTmdbUrl(countryProviders.link)}
+                movieTitle={movie.title}
               />
             ))}
           </div>
@@ -129,13 +132,21 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
 
 interface StreamingButtonProps {
   provider: Provider;
-  watchUrl: string;
+  movieTitle: string;
 }
 
-function StreamingButton({ provider, watchUrl }: StreamingButtonProps) {
+function StreamingButton({ provider, movieTitle }: StreamingButtonProps) {
+  // Get the search URL for this provider
+  const searchUrl = providerSearchUrls[provider.provider_id];
+  
+  // If we don't have a search URL for this provider, use TMDB
+  const url = searchUrl 
+    ? `${searchUrl}${encodeURIComponent(movieTitle)}`
+    : `https://www.themoviedb.org/movie/providers`;
+
   return (
     <a 
-      href={watchUrl} 
+      href={url}
       target="_blank" 
       rel="noopener noreferrer"
       className="inline-block"
