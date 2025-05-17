@@ -61,6 +61,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const movieDetails = await detailsResponse.json();
       const watchProvidersData = await watchProvidersResponse.json();
       
+      // Debug logging for watch providers
+      console.log('Watch Providers Raw Response:', watchProvidersData);
+      console.log('Watch Providers Results:', watchProvidersData.results);
+      console.log('US Providers:', watchProvidersData.results?.US);
+      
       // Combine movie details with watch providers data
       const movieWithProviders = {
         ...movieDetails,
@@ -68,6 +73,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           results: watchProvidersData.results || {}
         }
       };
+      
+      // Debug logging for combined data
+      console.log('Combined Movie Data watch_providers:', movieWithProviders.watch_providers);
       
       // Parse and validate the movie data
       const validatedMovie = tmdbMovieSchema.parse(movieWithProviders);

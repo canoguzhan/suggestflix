@@ -24,7 +24,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
   console.log('User country:', userCountry);
   
   // Get providers for user's country
-  const countryProviders = movie.watch_providers?.results?.[userCountry];
+  const countryProviders = movie.watch_providers?.results?.[userCountry.toUpperCase()];
   
   // Debug logging
   console.log('Country providers:', countryProviders);
