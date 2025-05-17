@@ -64,7 +64,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine movie details with watch providers data
       const movieWithProviders = {
         ...movieDetails,
-        watch_providers: watchProvidersData
+        watch_providers: {
+          results: watchProvidersData.results || {}
+        }
       };
       
       // Parse and validate the movie data
