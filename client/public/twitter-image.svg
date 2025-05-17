@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="418" viewBox="0 0 800 418" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>SuggestFlix Twitter Card</title>
+    <g fill="none" fill-rule="evenodd">
+        <!-- Background -->
+        <rect fill="#E31C25" width="800" height="418"/>
+        
+        <!-- Logo Container -->
+        <g transform="translate(40, 40)">
+            <!-- Film Icon -->
+            <g transform="translate(0, 120)" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="0" y="0" width="100" height="100" rx="8"/>
+                <line x1="25" y1="0" x2="25" y2="100"/>
+                <line x1="75" y1="0" x2="75" y2="100"/>
+                <line x1="0" y1="50" x2="100" y2="50"/>
+                <line x1="0" y1="25" x2="25" y2="25"/>
+                <line x1="0" y1="75" x2="25" y2="75"/>
+                <line x1="75" y1="75" x2="100" y2="75"/>
+                <line x1="75" y1="25" x2="100" y2="25"/>
+            </g>
+            
+            <!-- Text -->
+            <text x="130" y="180" font-family="Roboto, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF">
+                SuggestFlix
+            </text>
+            <text x="130" y="230" font-family="Roboto, sans-serif" font-size="32" fill="#FFFFFF" opacity="0.9">
+                Get Movie Recommendations Instantly
+            </text>
+        </g>
+    </g>
+</svg> 

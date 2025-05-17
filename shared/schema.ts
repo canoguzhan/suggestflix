@@ -19,11 +19,11 @@ export const movies = pgTable("movies", {
   id: serial("id").primaryKey(),
   tmdbId: integer("tmdb_id").notNull().unique(),
   title: text("title").notNull(),
-  posterPath: text("poster_path"),
-  releaseDate: text("release_date"),
-  overview: text("overview"),
-  voteAverage: text("vote_average"),
-  addedAt: timestamp("added_at").defaultNow(),
+  posterPath: text("poster_path").notNull(),
+  releaseDate: text("release_date").notNull(),
+  overview: text("overview").notNull(),
+  voteAverage: text("vote_average").notNull(),
+  addedAt: timestamp("added_at").notNull().defaultNow(),
 });
 
 export const insertMovieSchema = createInsertSchema(movies).omit({
@@ -34,9 +34,9 @@ export const insertMovieSchema = createInsertSchema(movies).omit({
 // Movie history schema
 export const movieHistory = pgTable("movie_history", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id"),
+  userId: integer("user_id").notNull().default(0),
   movieId: integer("movie_id").notNull(),
-  viewedAt: timestamp("viewed_at").defaultNow(),
+  viewedAt: timestamp("viewed_at").notNull().defaultNow(),
 });
 
 export const insertMovieHistorySchema = createInsertSchema(movieHistory).omit({
@@ -47,9 +47,9 @@ export const insertMovieHistorySchema = createInsertSchema(movieHistory).omit({
 // Favorites schema
 export const favorites = pgTable("favorites", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id"),
+  userId: integer("user_id").notNull().default(0),
   movieId: integer("movie_id").notNull(),
-  addedAt: timestamp("added_at").defaultNow(),
+  addedAt: timestamp("added_at").notNull().defaultNow(),
 });
 
 export const insertFavoriteSchema = createInsertSchema(favorites).omit({
@@ -95,6 +95,40 @@ export const tmdbMovieSchema = z.object({
   }).optional(),
 });
 
+// Scheduled Posts schema
+export const scheduledPosts = pgTable("scheduled_posts", {
+  id: serial("id").primaryKey(),
+  movieId: integer("movie_id").notNull(),
+  message: text("message").notNull(),
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  platforms: text("platforms").notNull(), // JSON string of enabled platforms
+  status: text("status").notNull().default("pending"), // pending, completed, failed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertScheduledPostSchema = createInsertSchema(scheduledPosts).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const scheduledPostSchema = z.object({
+  id: z.number(),
+  movieId: z.number(),
+  message: z.string(),
+  scheduledFor: z.date(),
+  platforms: z.object({
+    twitter: z.boolean(),
+    facebook: z.boolean(),
+    instagram: z.boolean(),
+  }),
+  status: z.enum(["pending", "completed", "failed"]),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -108,3 +142,6 @@ export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 
 export type TmdbMovie = z.infer<typeof tmdbMovieSchema>;
+
+export type InsertScheduledPost = z.infer<typeof insertScheduledPostSchema>;
+export type ScheduledPost = z.infer<typeof scheduledPostSchema>;

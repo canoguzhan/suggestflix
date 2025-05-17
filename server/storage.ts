@@ -3,7 +3,8 @@ import {
   movies, type Movie, type InsertMovie,
   movieHistory, type MovieHistory, type InsertMovieHistory,
   favorites, type Favorite, type InsertFavorite,
-  type TmdbMovie
+  type TmdbMovie,
+  type ScheduledPost
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -20,13 +21,27 @@ export interface IStorage {
   
   // Movie history operations
   getMovieHistory(userId?: number): Promise<MovieHistory[]>;
-  addMovieToHistory(movieHistory: InsertMovieHistory): Promise<MovieHistory>;
+  addMovieToHistory(movieHistory: { movieId: number; userId?: number | null }): Promise<MovieHistory>;
   
   // Favorites operations
   getFavorites(userId?: number): Promise<Favorite[]>;
-  addFavorite(favorite: InsertFavorite): Promise<Favorite>;
+  addFavorite(favorite: { movieId: number; userId?: number | null }): Promise<Favorite>;
   removeFavorite(id: number): Promise<void>;
   isFavorite(movieId: number, userId?: number): Promise<boolean>;
+
+  // Scheduled posts operations
+  getScheduledPosts(): Promise<ScheduledPost[]>;
+  schedulePost(post: {
+    movieId: number;
+    message: string;
+    scheduledFor: Date;
+    platforms: {
+      twitter: boolean;
+      facebook: boolean;
+      instagram: boolean;
+    };
+  }): Promise<ScheduledPost>;
+  updatePostStatus(id: number, status: 'pending' | 'completed' | 'failed'): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -34,20 +49,24 @@ export class MemStorage implements IStorage {
   private movies: Map<number, Movie>;
   private history: Map<number, MovieHistory>;
   private favs: Map<number, Favorite>;
+  private scheduledPosts: Map<number, ScheduledPost>;
   private userIdCounter: number;
   private movieIdCounter: number;
   private historyIdCounter: number;
   private favIdCounter: number;
+  private scheduledPostIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.movies = new Map();
     this.history = new Map();
     this.favs = new Map();
+    this.scheduledPosts = new Map();
     this.userIdCounter = 1;
     this.movieIdCounter = 1;
     this.historyIdCounter = 1;
     this.favIdCounter = 1;
+    this.scheduledPostIdCounter = 1;
   }
 
   // User operations
@@ -99,11 +118,12 @@ export class MemStorage implements IStorage {
     return historyArray;
   }
 
-  async addMovieToHistory(insertHistory: InsertMovieHistory): Promise<MovieHistory> {
+  async addMovieToHistory(insertHistory: { movieId: number; userId?: number | null }): Promise<MovieHistory> {
     const id = this.historyIdCounter++;
     const historyItem: MovieHistory = { 
       ...insertHistory, 
-      id, 
+      id,
+      userId: insertHistory.userId || null,
       viewedAt: new Date() 
     };
     this.history.set(id, historyItem);
@@ -119,11 +139,12 @@ export class MemStorage implements IStorage {
     return favsArray;
   }
 
-  async addFavorite(insertFavorite: InsertFavorite): Promise<Favorite> {
+  async addFavorite(insertFavorite: { movieId: number; userId?: number | null }): Promise<Favorite> {
     const id = this.favIdCounter++;
     const favorite: Favorite = { 
       ...insertFavorite, 
-      id, 
+      id,
+      userId: insertFavorite.userId || null,
       addedAt: new Date() 
     };
     this.favs.set(id, favorite);
@@ -140,6 +161,49 @@ export class MemStorage implements IStorage {
       return favsArray.some(f => f.movieId === movieId && f.userId === userId);
     }
     return favsArray.some(f => f.movieId === movieId);
+  }
+
+  // Scheduled posts operations
+  async getScheduledPosts(): Promise<ScheduledPost[]> {
+    return Array.from(this.scheduledPosts.values());
+  }
+
+  async schedulePost(insertPost: {
+    movieId: number;
+    message: string;
+    scheduledFor: Date;
+    platforms: {
+      twitter: boolean;
+      facebook: boolean;
+      instagram: boolean;
+    };
+  }): Promise<ScheduledPost> {
+    const id = this.scheduledPostIdCounter++;
+    const now = new Date();
+    const post: ScheduledPost = {
+      ...insertPost,
+      id,
+      platforms: typeof insertPost.platforms === 'string' 
+        ? JSON.parse(insertPost.platforms)
+        : insertPost.platforms,
+      scheduledFor: new Date(insertPost.scheduledFor),
+      status: 'pending',
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.scheduledPosts.set(id, post);
+    return post;
+  }
+
+  async updatePostStatus(id: number, status: 'pending' | 'completed' | 'failed'): Promise<void> {
+    const post = this.scheduledPosts.get(id);
+    if (post) {
+      this.scheduledPosts.set(id, {
+        ...post,
+        status,
+        updatedAt: new Date(),
+      });
+    }
   }
 }
 

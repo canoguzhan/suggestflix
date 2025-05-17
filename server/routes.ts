@@ -262,6 +262,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Admin routes for social media automation
+  app.get('/api/movies/search', async (req: Request, res: Response) => {
+    try {
+      const query = req.query.query as string;
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1`
+      );
+
+      if (!response.ok) {
+        throw new Error(`TMDB API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const movies = data.results.map((movie: any) => ({
+        ...movie,
+        poster_path: movie.poster_path || null,
+        backdrop_path: movie.backdrop_path || null,
+        release_date: movie.release_date || '',
+        overview: movie.overview || '',
+        vote_average: movie.vote_average || 0,
+        runtime: movie.runtime || 0,
+        genres: movie.genres || [],
+        watch_providers: { results: {} }
+      })).map((movie: any) => tmdbMovieSchema.parse(movie));
+
+      res.json(movies);
+    } catch (error) {
+      console.error('Error searching movies:', error);
+      res.status(500).json({ message: 'Failed to search movies' });
+    }
+  });
+
+  app.get('/api/admin/scheduled-posts', async (req, res) => {
+    try {
+      const posts = await storage.getScheduledPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error('Error fetching scheduled posts:', error);
+      res.status(500).json({ message: 'Failed to fetch scheduled posts' });
+    }
+  });
+
+  app.post('/api/admin/schedule-post', async (req, res) => {
+    try {
+      const { movieId, message, scheduledFor, platforms } = req.body;
+      
+      // Validate input
+      if (!movieId || !message || !scheduledFor || !platforms) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Schedule the post
+      const scheduledPost = await storage.schedulePost({
+        movieId,
+        message,
+        scheduledFor: new Date(scheduledFor),
+        platforms: typeof platforms === 'string' ? JSON.parse(platforms) : platforms
+      });
+
+      // Schedule the social media posts
+      await scheduleSocialMediaPosts(scheduledPost);
+
+      res.json(scheduledPost);
+    } catch (error) {
+      console.error('Error scheduling post:', error);
+      res.status(500).json({ message: 'Failed to schedule post' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Function to handle social media posting
+async function scheduleSocialMediaPosts(post: any) {
+  const { movieId, message, scheduledFor, platforms, movie } = post;
+  
+  // Create the social media message
+  const socialMessage = `${message}\n\n🎬 ${movie.title}\n🌟 Rating: ${movie.vote_average}/10\n\n#MovieRecommendation #SuggestFlix`;
+  
+  // Schedule posts for each enabled platform
+  if (platforms.twitter) {
+    // Schedule Twitter post
+    await scheduleTwitterPost(socialMessage, scheduledFor, movie.poster_path);
+  }
+  
+  if (platforms.facebook) {
+    // Schedule Facebook post
+    await scheduleFacebookPost(socialMessage, scheduledFor, movie.poster_path);
+  }
+  
+  if (platforms.instagram) {
+    // Schedule Instagram post
+    await scheduleInstagramPost(socialMessage, scheduledFor, movie.poster_path);
+  }
+}
+
+// Platform-specific posting functions
+async function scheduleTwitterPost(message: string, date: Date, imageUrl: string) {
+  // Implement Twitter API integration
+  // You'll need to use the Twitter API v2 with authentication
+  console.log('Scheduled Twitter post:', { message, date, imageUrl });
+}
+
+async function scheduleFacebookPost(message: string, date: Date, imageUrl: string) {
+  // Implement Facebook API integration
+  // You'll need to use the Facebook Graph API with authentication
+  console.log('Scheduled Facebook post:', { message, date, imageUrl });
+}
+
+async function scheduleInstagramPost(message: string, date: Date, imageUrl: string) {
+  // Implement Instagram API integration
+  // You'll need to use the Instagram Graph API with authentication
+  console.log('Scheduled Instagram post:', { message, date, imageUrl });
 }
