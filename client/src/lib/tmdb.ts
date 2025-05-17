@@ -1,9 +1,9 @@
 import { TmdbMovie } from "@shared/schema";
-import { detectLanguage } from "./localization";
+import { useLanguageStore } from "./localization";
 
 // Query configuration for fetching a random movie
 export const randomMovieQuery = () => {
-  const language = detectLanguage();
+  const language = useLanguageStore.getState().language;
   return {
     queryKey: ["/api/movies/random", language],
     queryFn: async () => {
@@ -17,9 +17,19 @@ export const randomMovieQuery = () => {
 };
 
 // Query configuration for fetching movie history
-export const historyQuery = () => ({
-  queryKey: ["/api/movies/history"],
-});
+export const historyQuery = () => {
+  const language = useLanguageStore.getState().language;
+  return {
+    queryKey: ["/api/movies/history", language],
+    queryFn: async () => {
+      const res = await fetch(`/api/movies/history?language=${language}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch movie history");
+      }
+      return res.json();
+    }
+  };
+};
 
 // Query configuration for fetching favorites
 export const favoritesQuery = () => ({

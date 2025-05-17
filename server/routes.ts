@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fetch watch providers separately
       const watchProvidersResponse = await fetch(
-        `https://api.themoviedb.org/3/movie/${randomMovie.id}/watch/providers?api_key=${TMDB_API_KEY}`
+        `https://api.themoviedb.org/3/movie/${randomMovie.id}/watch/providers?api_key=${TMDB_API_KEY}&language=${language}`
       );
       
       if (!watchProvidersResponse.ok) {
@@ -117,6 +117,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get movie history
   app.get('/api/movies/history', async (req: Request, res: Response) => {
     try {
+      // Get language from request (default to 'en')
+      const language = req.query.language || 'en';
+      
       // Get movie history without user association for now
       const history = await storage.getMovieHistory();
       
@@ -125,19 +128,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch movie details for each history item
       for (const historyItem of history) {
-        const movie = await storage.getMovie(historyItem.movieId);
-        if (movie) {
+        const storedMovie = await storage.getMovie(historyItem.movieId);
+        if (storedMovie) {
+          // Fetch updated movie details from TMDB in the requested language
+          const detailsResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${storedMovie.tmdbId}?api_key=${TMDB_API_KEY}&language=${language}`
+          );
+          
+          if (!detailsResponse.ok) {
+            console.error(`Failed to fetch movie details for ID ${storedMovie.tmdbId}`);
+            continue;
+          }
+          
+          const movieDetails = await detailsResponse.json();
+          
+          // Fetch watch providers
+          const watchProvidersResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${storedMovie.tmdbId}/watch/providers?api_key=${TMDB_API_KEY}&language=${language}`
+          );
+          
+          let watchProviders = { results: {} };
+          if (watchProvidersResponse.ok) {
+            watchProviders = await watchProvidersResponse.json();
+          }
+          
+          // Combine movie details with watch providers
+          const movieWithProviders = {
+            ...movieDetails,
+            watch_providers: watchProviders,
+            storedId: storedMovie.id
+          };
+          
           detailedHistory.push({
             ...historyItem,
-            movie
+            movie: movieWithProviders
           });
         }
       }
       
       // Sort by viewedAt descending
-      detailedHistory.sort((a, b) => 
-        new Date(b.viewedAt).getTime() - new Date(a.viewedAt).getTime()
-      );
+      detailedHistory.sort((a, b) => {
+        const dateA = a.viewedAt instanceof Date ? a.viewedAt.getTime() : 0;
+        const dateB = b.viewedAt instanceof Date ? b.viewedAt.getTime() : 0;
+        return dateB - dateA;
+      });
       
       return res.status(200).json(detailedHistory);
     } catch (error) {
@@ -212,9 +246,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Sort by addedAt descending
-      detailedFavorites.sort((a, b) => 
-        new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
-      );
+      detailedFavorites.sort((a, b) => {
+        const dateA = a.addedAt instanceof Date ? a.addedAt.getTime() : 0;
+        const dateB = b.addedAt instanceof Date ? b.addedAt.getTime() : 0;
+        return dateB - dateA;
+      });
       
       return res.status(200).json(detailedFavorites);
     } catch (error) {
