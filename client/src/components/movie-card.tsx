@@ -6,98 +6,81 @@ import { TmdbMovie } from "@shared/schema";
 import { useTranslation } from "@/lib/localization";
 import StreamingLinks from "@/components/streaming-links";
 import { useFavorites } from "@/hooks/use-favorites";
+import { getTmdbMovieUrl } from "@/lib/tmdb";
 
 interface MovieCardProps {
   movie: TmdbMovie & { storedId: number };
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
-  const { t } = useTranslation();
-  const { favorites, toggleFavorite } = useFavorites();
+  const { t, language } = useTranslation();
+  const { toggleFavorite, isFavorite } = useFavorites();
   
-  const posterUrl = movie.poster_path 
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
-    : "https://via.placeholder.com/500x750?text=No+Poster+Available";
-
-  // Format release date
-  const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "Unknown";
+  const releaseYear = movie.release_date?.split('-')[0];
+  const runtime = movie.runtime;
+  const genres = movie.genres?.map(g => g.name).join(', ');
   
-  // Check if movie is in favorites
-  const isFavorite = favorites.some(fav => fav.movieId === movie.storedId);
-
   return (
-    <Card id="movieCard" className="max-w-4xl mx-auto bg-white dark:bg-secondary rounded-xl shadow-lg overflow-hidden mb-12">
-      <div className="flex flex-col md:flex-row">
-        <div className="md:w-1/3 flex-shrink-0">
-          <img 
-            src={posterUrl}
-            alt={`${movie.title} poster`} 
-            className="w-full h-auto md:h-full object-cover"
-          />
-        </div>
-        <CardContent className="p-6 md:w-2/3">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-2xl font-bold text-secondary dark:text-white">{movie.title}</h3>
-            <div className="flex items-center gap-2">
-              <span className="bg-primary text-white py-1 px-2 rounded-lg text-sm font-bold">
-                {movie.vote_average?.toFixed(1)}
-              </span>
-              <Button
-                variant={isFavorite ? "destructive" : "secondary"}
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => toggleFavorite(movie.storedId)}
-              >
-                {isFavorite ? (
-                  <>
-                    <HeartOff size={16} />
-                    <span className="sr-only">Remove from Favorites</span>
-                  </>
-                ) : (
-                  <>
-                    <Heart size={16} />
-                    <span className="sr-only">Add to Favorites</span>
-                  </>
+    <Card className="w-full max-w-4xl mx-auto movie-card">
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-shrink-0">
+            <img
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              alt={movie.title}
+              className="w-full md:w-64 rounded-lg shadow-lg"
+            />
+          </div>
+          <div className="flex-grow space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold">{movie.title}</h2>
+                <div className="text-muted-foreground mt-1 space-x-2">
+                  {releaseYear && (
+                    <span>
+                      {t('movie.year')}: {releaseYear}
+                    </span>
+                  )}
+                  {runtime && (
+                    <span>
+                      • {runtime} {t('movie.runtime')}
+                    </span>
+                  )}
+                </div>
+                {genres && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {genres}
+                  </div>
                 )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <span className="text-accent mr-3">{releaseYear}</span>
-            {movie.runtime && <span className="text-accent">{movie.runtime} {t('movie.runtime')}</span>}
-          </div>
-
-          {movie.genres && movie.genres.length > 0 && (
-            <div className="mb-4 text-sm">
-              {movie.genres.map((genre) => (
-                <span 
-                  key={genre.id}
-                  className="inline-block bg-gray-200 dark:bg-gray-800 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-300 mr-2 mb-2"
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => toggleFavorite(movie.storedId)}
                 >
-                  {genre.name}
-                </span>
-              ))}
+                  {isFavorite(movie.storedId) ? (
+                    <Heart className="h-5 w-5 fill-primary text-primary" />
+                  ) : (
+                    <HeartOff className="h-5 w-5" />
+                  )}
+                </Button>
+                <a
+                  href={getTmdbMovieUrl(movie.id, language)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="ghost" size="icon">
+                    <ExternalLink className="h-5 w-5" />
+                  </Button>
+                </a>
+              </div>
             </div>
-          )}
-
-          <p className="text-accent mb-6">{movie.overview}</p>
-
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              variant="secondary"
-              className="inline-flex items-center"
-              asChild
-            >
-              <a href={`https://www.themoviedb.org/movie/${movie.id}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink size={16} className="mr-2" /> {t('movie.viewTmdb')}
-              </a>
-            </Button>
+            <p className="text-muted-foreground">{movie.overview}</p>
+            <StreamingLinks movie={movie} />
           </div>
-
-          <StreamingLinks movie={movie} />
-        </CardContent>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }

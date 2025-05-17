@@ -32,7 +32,8 @@ export const getTmdbImageUrl = (path: string | null, size: string = "w500") => {
   return `https://image.tmdb.org/t/p/${size}${path}`;
 };
 
-// Helper function to get TMDB movie URL
-export const getTmdbMovieUrl = (id: number) => {
-  return `https://www.themoviedb.org/movie/${id}`;
+// Helper function to get localized TMDB movie URL
+export const getTmdbMovieUrl = (id: number, language: string) => {
+  const langPath = language === 'en' ? '' : `/${language}`;
+  return `https://www.themoviedb.org${langPath}/movie/${id}`;
 };
