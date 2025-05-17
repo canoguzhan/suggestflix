@@ -12,6 +12,7 @@ interface Provider {
   provider_id: number;
   provider_name: string;
   logo_path: string;
+  provider_url?: string;
 }
 
 export default function StreamingLinks({ movie }: StreamingLinksProps) {
@@ -34,10 +35,19 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
     return null;
   }
 
-  // Group providers by type
-  const streamingProviders = countryProviders.flatrate || [];
-  const rentProviders = countryProviders.rent || [];
-  const buyProviders = countryProviders.buy || [];
+  // Group providers by type and add URLs
+  const streamingProviders = (countryProviders.flatrate || []).map(provider => ({
+    ...provider,
+    provider_url: countryProviders.link
+  }));
+  const rentProviders = (countryProviders.rent || []).map(provider => ({
+    ...provider,
+    provider_url: countryProviders.link
+  }));
+  const buyProviders = (countryProviders.buy || []).map(provider => ({
+    ...provider,
+    provider_url: countryProviders.link
+  }));
 
   // If no providers at all, return null
   if (streamingProviders.length === 0 && rentProviders.length === 0 && buyProviders.length === 0) {
@@ -55,7 +65,6 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={countryProviders.link}
               />
             ))}
           </div>
@@ -70,7 +79,6 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={countryProviders.link}
               />
             ))}
           </div>
@@ -85,7 +93,6 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
               <StreamingButton 
                 key={provider.provider_id} 
                 provider={provider}
-                watchUrl={countryProviders.link}
               />
             ))}
           </div>
@@ -97,13 +104,12 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
 
 interface StreamingButtonProps {
   provider: Provider;
-  watchUrl: string;
 }
 
-function StreamingButton({ provider, watchUrl }: StreamingButtonProps) {
+function StreamingButton({ provider }: StreamingButtonProps) {
   return (
     <a 
-      href={watchUrl} 
+      href={provider.provider_url} 
       target="_blank" 
       rel="noopener noreferrer"
       className="inline-block"
