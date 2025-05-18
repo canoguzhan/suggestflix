@@ -6,6 +6,7 @@ import { useTranslation } from '@/lib/localization';
 
 interface StreamingLinksProps {
   movie: TmdbMovie;
+  onProviderClick?: (provider: string) => void;
 }
 
 interface Provider {
@@ -37,7 +38,7 @@ const providerSearchUrls: Record<number, string> = {
   // Add more providers as needed
 };
 
-export default function StreamingLinks({ movie }: StreamingLinksProps) {
+export default function StreamingLinks({ movie, onProviderClick }: StreamingLinksProps) {
   const { t, language } = useTranslation();
   const [userCountry, setUserCountry] = useState<string>('US');
 
@@ -91,6 +92,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
                 key={provider.provider_id} 
                 provider={provider}
                 movieTitle={movie.title}
+                onProviderClick={onProviderClick}
               />
             ))}
           </div>
@@ -106,6 +108,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
                 key={provider.provider_id} 
                 provider={provider}
                 movieTitle={movie.title}
+                onProviderClick={onProviderClick}
               />
             ))}
           </div>
@@ -121,6 +124,7 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
                 key={provider.provider_id} 
                 provider={provider}
                 movieTitle={movie.title}
+                onProviderClick={onProviderClick}
               />
             ))}
           </div>
@@ -133,9 +137,10 @@ export default function StreamingLinks({ movie }: StreamingLinksProps) {
 interface StreamingButtonProps {
   provider: Provider;
   movieTitle: string;
+  onProviderClick?: (provider: string) => void;
 }
 
-function StreamingButton({ provider, movieTitle }: StreamingButtonProps) {
+function StreamingButton({ provider, movieTitle, onProviderClick }: StreamingButtonProps) {
   // Get the search URL for this provider
   const searchUrl = providerSearchUrls[provider.provider_id];
   
@@ -144,12 +149,17 @@ function StreamingButton({ provider, movieTitle }: StreamingButtonProps) {
     ? `${searchUrl}${encodeURIComponent(movieTitle)}`
     : `https://www.google.com/search?q=${encodeURIComponent(`${movieTitle} watch on ${provider.provider_name}`)}`;
 
+  const handleClick = () => {
+    onProviderClick?.(provider.provider_name);
+  };
+
   return (
     <a 
       href={url}
       target="_blank" 
       rel="noopener noreferrer"
       className="inline-block"
+      onClick={handleClick}
     >
       <Button
         variant="outline"

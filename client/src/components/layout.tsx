@@ -5,6 +5,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useTranslation } from "@/lib/localization";
 import { Link } from "wouter";
 import LanguageSelector from "@/components/language-selector";
+import { trackThemeToggle } from "@/lib/analytics";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,11 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { t, language } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+    trackThemeToggle(theme === 'dark' ? 'light' : 'dark');
+  };
 
   // Create the icon element based on the current theme
   const themeIcon = theme === "dark" 
@@ -25,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
     { 
       variant: "ghost", 
       size: "icon", 
-      onClick: toggleTheme, 
+      onClick: handleThemeToggle, 
       className: "text-white" 
     },
     themeIcon
@@ -67,7 +73,7 @@ export default function Layout({ children }: LayoutProps) {
               {t('footer.poweredBy')}
             </p>
             <div className="flex items-center gap-4">
-              <a href="https://twitter.com" className="text-gray-400 hover:text-white">
+              <a href="https://instagram.com/suggestflix" className="text-gray-400 hover:text-white">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -78,22 +84,9 @@ export default function Layout({ children }: LayoutProps) {
                   strokeLinejoin="round"
                   className="h-5 w-5"
                 >
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                </svg>
-              </a>
-              <a href="mailto:contact@example.com" className="text-gray-400 hover:text-white">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
                 </svg>
               </a>
             </div>

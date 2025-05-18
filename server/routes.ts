@@ -298,43 +298,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/scheduled-posts', async (req, res) => {
-    try {
-      const posts = await storage.getScheduledPosts();
-      res.json(posts);
-    } catch (error) {
-      console.error('Error fetching scheduled posts:', error);
-      res.status(500).json({ message: 'Failed to fetch scheduled posts' });
-    }
-  });
-
-  app.post('/api/admin/schedule-post', async (req, res) => {
-    try {
-      const { movieId, message, scheduledFor, platforms } = req.body;
-      
-      // Validate input
-      if (!movieId || !message || !scheduledFor || !platforms) {
-        return res.status(400).json({ message: 'Missing required fields' });
-      }
-
-      // Schedule the post
-      const scheduledPost = await storage.schedulePost({
-        movieId,
-        message,
-        scheduledFor: new Date(scheduledFor),
-        platforms: typeof platforms === 'string' ? JSON.parse(platforms) : platforms
-      });
-
-      // Schedule the social media posts
-      await scheduleSocialMediaPosts(scheduledPost);
-
-      res.json(scheduledPost);
-    } catch (error) {
-      console.error('Error scheduling post:', error);
-      res.status(500).json({ message: 'Failed to schedule post' });
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }

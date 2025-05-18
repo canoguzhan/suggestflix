@@ -7,6 +7,7 @@ import { useTranslation } from "@/lib/localization";
 import StreamingLinks from "@/components/streaming-links";
 import { useFavorites } from "@/hooks/use-favorites";
 import { getTmdbMovieUrl } from "@/lib/tmdb";
+import { trackMovieFavorite, trackMovieUnfavorite, trackStreamingClick } from "@/lib/analytics";
 
 interface MovieCardProps {
   movie: TmdbMovie & { storedId: number };
@@ -20,6 +21,21 @@ export default function MovieCard({ movie }: MovieCardProps) {
   const runtime = movie.runtime;
   const genres = movie.genres?.map(g => g.name).join(', ');
   
+  const handleFavoriteToggle = () => {
+    const newFavoriteState = !isFavorite(movie.storedId);
+    toggleFavorite(movie.storedId);
+    
+    if (newFavoriteState) {
+      trackMovieFavorite(movie.id, movie.title);
+    } else {
+      trackMovieUnfavorite(movie.id, movie.title);
+    }
+  };
+
+  const handleStreamingClick = (provider: string) => {
+    trackStreamingClick(provider, movie.id, movie.title);
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto movie-card">
       <CardContent className="p-6">
@@ -57,7 +73,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => toggleFavorite(movie.storedId)}
+                  onClick={handleFavoriteToggle}
                 >
                   {isFavorite(movie.storedId) ? (
                     <Heart className="h-5 w-5 fill-primary text-primary" />
@@ -77,7 +93,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
               </div>
             </div>
             <p className="text-muted-foreground">{movie.overview}</p>
-            <StreamingLinks movie={movie} />
+            <StreamingLinks movie={movie} onProviderClick={handleStreamingClick} />
           </div>
         </div>
       </CardContent>

@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 import { useTranslation } from '@/lib/localization';
+import { trackLanguageChange } from "@/lib/analytics";
 
 const languages = {
   en: 'English',
@@ -22,6 +23,11 @@ const languages = {
 export default function LanguageSelector() {
   const { language, setLanguage } = useTranslation();
 
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    trackLanguageChange(newLanguage);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,7 +40,7 @@ export default function LanguageSelector() {
         {Object.entries(languages).map(([code, name]) => (
           <DropdownMenuItem
             key={code}
-            onClick={() => setLanguage(code as any)}
+            onClick={() => handleLanguageChange(code as any)}
             className={language === code ? 'bg-accent' : ''}
           >
             {name}
