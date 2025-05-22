@@ -373,26 +373,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to verify server is running
+  app.get('/api/test', (req: Request, res: Response) => {
+    console.log('Test endpoint hit');
+    res.json({ status: 'ok', message: 'Server is running' });
+  });
+
   // Get Reddit RSS feed
   app.get('/api/reddit/rss', async (req: Request, res: Response) => {
+    console.log('Reddit RSS endpoint hit');
+    console.log('Request headers:', req.headers);
+    
     try {
       console.log('Fetching Reddit RSS feed...');
-      const response = await fetch('https://www.reddit.com/r/movies/.rss');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch('https://www.reddit.com/r/movies/.rss', {
+        headers: {
+          'User-Agent': 'SuggestFlix/1.0 (https://suggestflix.com)',
+          'Accept': 'application/rss+xml, application/xml, text/xml'
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       console.log('Reddit RSS response status:', response.status);
+      console.log('Reddit RSS response headers:', response.headers);
       
       if (!response.ok) {
         console.error('Reddit RSS feed error:', response.status, response.statusText);
-        throw new Error(`Failed to fetch Reddit RSS feed: ${response.status}`);
+        throw new Error(`Failed to fetch Reddit RSS feed: ${response.status} ${response.statusText}`);
       }
 
       const text = await response.text();
       console.log('Reddit RSS feed length:', text.length);
       console.log('First 100 characters of feed:', text.substring(0, 100));
       
+      if (!text.includes('<?xml') || !text.includes('<rss')) {
+        console.error('Invalid RSS feed format received');
+        throw new Error('Invalid RSS feed format');
+      }
+      
       res.setHeader('Content-Type', 'application/json');
       res.json({ feed: text });
     } catch (error) {
       console.error('Error fetching Reddit RSS feed:', error);
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
       // Return dummy data instead of error
       const dummyFeed = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
