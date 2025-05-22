@@ -5,14 +5,16 @@ import { useLanguageStore } from "./localization";
 export const randomMovieQuery = () => {
   const language = useLanguageStore.getState().language;
   return {
-    queryKey: ["/api/movies/random", language],
+    queryKey: ["/api/movies/random", language, Date.now()],
     queryFn: async () => {
-      const res = await fetch(`/api/movies/random?language=${language}`);
+      const res = await fetch(`/api/movies/random?language=${language}&t=${Date.now()}`);
       if (!res.ok) {
         throw new Error("Failed to fetch random movie");
       }
       return res.json();
-    }
+    },
+    staleTime: 0,
+    cacheTime: 0,
   };
 };
 
