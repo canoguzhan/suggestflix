@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Heart, HeartOff } from "lucide-react";
@@ -8,6 +8,7 @@ import StreamingLinks from "@/components/streaming-links";
 import { useFavorites } from "@/hooks/use-favorites";
 import { getTmdbMovieUrl } from "@/lib/tmdb";
 import { trackMovieFavorite, trackMovieUnfavorite, trackStreamingClick } from "@/lib/analytics";
+import { useInView } from "react-intersection-observer";
 
 interface MovieCardProps {
   movie: TmdbMovie & { storedId: number };
@@ -16,6 +17,11 @@ interface MovieCardProps {
 export default function MovieCard({ movie }: MovieCardProps) {
   const { t, language } = useTranslation();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
   
   const releaseYear = movie.release_date?.split('-')[0];
   const runtime = movie.runtime;
@@ -36,16 +42,43 @@ export default function MovieCard({ movie }: MovieCardProps) {
     trackStreamingClick(provider, movie.id, movie.title);
   };
 
+  // Generate responsive image sizes
+  const getResponsiveImageUrl = (path: string) => {
+    if (!path) return null;
+    return {
+      small: `https://image.tmdb.org/t/p/w185${path}`,
+      medium: `https://image.tmdb.org/t/p/w342${path}`,
+      large: `https://image.tmdb.org/t/p/w500${path}`,
+    };
+  };
+
+  const imageUrls = movie.poster_path ? getResponsiveImageUrl(movie.poster_path) : null;
+
   return (
-    <Card className="w-full max-w-4xl mx-auto movie-card">
+    <Card className="movie-card bg-white dark:bg-secondary rounded-xl shadow-lg overflow-hidden dark-mode-optimized">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-shrink-0">
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-              className="w-full md:w-64 rounded-lg shadow-lg"
-            />
+          <div className="flex-shrink-0" ref={ref}>
+            {inView && imageUrls ? (
+              <div className="relative w-full md:w-64 aspect-[2/3] rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
+                <img
+                  src={imageUrls.small}
+                  srcSet={`${imageUrls.small} 185w, ${imageUrls.medium} 342w, ${imageUrls.large} 500w`}
+                  sizes="(max-width: 768px) 100vw, 256px"
+                  alt={movie.title}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="lazy"
+                  onLoad={() => setImageLoaded(true)}
+                />
+                {!imageLoaded && (
+                  <div className="absolute inset-0 animate-pulse bg-gray-300 dark:bg-gray-600" />
+                )}
+              </div>
+            ) : (
+              <div className="w-full md:w-64 aspect-[2/3] rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            )}
           </div>
           <div className="flex-grow space-y-4">
             <div className="flex justify-between items-start">
