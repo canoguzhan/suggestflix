@@ -1,0 +1,130 @@
+/* Custom media queries for better responsive design */
+
+/* Small devices (phones, 576px and up) */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Adjust hero section for mobile */
+  .hero-section h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .hero-section p {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  /* Adjust movie card for mobile */
+  .movie-card {
+    margin: 0 -1rem;
+    border-radius: 0;
+  }
+
+  /* Adjust ad banners for mobile */
+  .ad-banner {
+    margin: 1rem -1rem;
+    border-radius: 0;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  /* Adjust grid layouts for tablets */
+  .grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+
+  /* Improve readability on larger screens */
+  .content-section {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-optimized {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  .print-content {
+    color: black;
+    background: white;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    --text-color: black;
+    --background-color: white;
+    --link-color: #0000EE;
+    --visited-color: #551A8B;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .touch-optimized {
+    padding: 1rem;
+    min-height: 44px; /* Minimum touch target size */
+  }
+
+  .touch-optimized button {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* Landscape orientation specific styles */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-optimized {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .landscape-optimized .hero-section {
+    margin-top: 0;
+  }
+} 
