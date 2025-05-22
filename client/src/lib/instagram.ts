@@ -18,7 +18,7 @@ interface InstagramResponse {
   };
 }
 
-const INSTAGRAM_API_URL = 'https://graph.instagram.com/me/media';
+const INSTAGRAM_API_URL = 'https://graph.facebook.com/v18.0/me/media';
 const INSTAGRAM_ACCESS_TOKEN = (import.meta as unknown as { env: { VITE_INSTAGRAM_ACCESS_TOKEN?: string } }).env.VITE_INSTAGRAM_ACCESS_TOKEN;
 
 export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramPost[]> {
@@ -29,14 +29,21 @@ export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramP
 
   try {
     const response = await fetch(
-      `${INSTAGRAM_API_URL}?fields=id,media_url,caption,permalink,timestamp,media_type&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`
+      `${INSTAGRAM_API_URL}?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch Instagram posts');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Instagram API Error:', errorData);
+      throw new Error(`Failed to fetch Instagram posts: ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data: InstagramResponse = await response.json();
+    if (!data.data || data.data.length === 0) {
+      console.warn('No Instagram posts found. Using dummy data instead.');
+      return getDummyPosts();
+    }
+
     return data.data;
   } catch (error) {
     console.error('Error fetching Instagram posts:', error);
