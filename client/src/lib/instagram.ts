@@ -27,18 +27,22 @@ export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramP
     return getDummyPosts();
   }
 
+  console.log('Attempting to fetch Instagram posts with token:', INSTAGRAM_ACCESS_TOKEN.substring(0, 10) + '...');
   try {
-    const response = await fetch(
-      `${INSTAGRAM_API_URL}?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`
-    );
+    const url = `${INSTAGRAM_API_URL}?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+    console.log('Fetching from URL:', url.replace(INSTAGRAM_ACCESS_TOKEN, '***'));
+    const response = await fetch(url);
 
+    console.log('Response status:', response.status);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('Instagram API Error:', errorData);
+      console.error('Full error response:', JSON.stringify(errorData, null, 2));
       throw new Error(`Failed to fetch Instagram posts: ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data: InstagramResponse = await response.json();
+    console.log('Instagram API Response:', JSON.stringify(data, null, 2));
     if (!data.data || data.data.length === 0) {
       console.warn('No Instagram posts found. Using dummy data instead.');
       return getDummyPosts();
@@ -46,7 +50,10 @@ export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramP
 
     return data.data;
   } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
+    console.error('Error fetching Instagram posts:', error instanceof Error ? error.message : error);
+    if (error instanceof Error && error.stack) {
+      console.error('Error stack:', error.stack);
+    }
     return getDummyPosts();
   }
 }
