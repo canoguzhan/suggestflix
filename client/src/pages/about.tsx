@@ -1,82 +1,63 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const AboutPage = () => {
+const AboutPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-primary to-secondary">
+      <div className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold mb-4">About SuggestFlix</h1>
-          <p className="text-xl text-gray-300">Your AI-Powered Movie Recommendation Platform</p>
+          <h1 className="text-4xl font-bold text-white mb-4">About Us</h1>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+            SuggestFlix is your go-to platform for discovering movies and TV shows tailored to your taste. We leverage the power of the TMDB (The Movie Database) API to bring you up-to-date and comprehensive information about the latest releases, hidden gems, and all-time favorites. Our mission is to make movie discovery fun, easy, and accessible for everyone.
+          </p>
         </motion.div>
 
-        <div className="space-y-8">
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-gray-800 rounded-lg p-6 shadow-lg"
+            className="bg-white/10 backdrop-blur-lg rounded-lg p-8"
           >
-            <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
-            <p className="text-gray-300 leading-relaxed">
-              At SuggestFlix, we're revolutionizing the way people discover movies. Our mission is to
-              connect viewers with their perfect next watch using cutting-edge AI technology and
-              personalized recommendations.
+            <h2 className="text-2xl font-semibold text-white mb-4">Our Mission</h2>
+            <p className="text-gray-200">
+              We believe that everyone deserves a personalized and enjoyable movie night. By utilizing the TMDB API, we provide accurate and rich movie data, helping you find the perfect film or show for any occasion. Whether you're looking for trending blockbusters or indie classics, SuggestFlix is here to guide your next watch.
             </p>
-          </motion.section>
+          </motion.div>
 
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-gray-800 rounded-lg p-6 shadow-lg"
+            className="bg-white/10 backdrop-blur-lg rounded-lg p-8"
           >
-            <h2 className="text-2xl font-semibold mb-4">What We Do</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              We leverage advanced artificial intelligence to analyze your viewing preferences and
-              provide tailored movie suggestions. Our platform considers various factors including:
+            <h2 className="text-2xl font-semibold text-white mb-4">Powered by TMDB</h2>
+            <p className="text-gray-200">
+              All movie and TV show data on SuggestFlix is sourced from TMDB, ensuring you get the most up-to-date and detailed information. TMDB is a community-built movie and TV database, trusted by millions of users worldwide. We are proud to use their API to enhance your movie discovery experience.
             </p>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>Your viewing history and preferences</li>
-              <li>Genre preferences and mood</li>
-              <li>Similar user patterns and ratings</li>
-              <li>Current trends and popular content</li>
-            </ul>
-          </motion.section>
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="bg-gray-800 rounded-lg p-6 shadow-lg"
-          >
-            <h2 className="text-2xl font-semibold mb-4">Our Team</h2>
-            <p className="text-gray-300 leading-relaxed">
-              We are a passionate team of movie enthusiasts, data scientists, and technology experts
-              dedicated to creating the best movie discovery experience. Our diverse backgrounds and
-              shared love for cinema drive us to continuously improve our recommendation system.
-            </p>
-          </motion.section>
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="bg-gray-800 rounded-lg p-6 shadow-lg"
-          >
-            <h2 className="text-2xl font-semibold mb-4">Join Our Journey</h2>
-            <p className="text-gray-300 leading-relaxed">
-              Whether you're a casual movie watcher or a dedicated cinephile, SuggestFlix is here to
-              enhance your movie-watching experience. Join our growing community and discover your
-              next favorite film today!
-            </p>
-          </motion.section>
+          </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mt-16 max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg p-8"
+        >
+          <h2 className="text-2xl font-semibold text-white mb-4">Our Team</h2>
+          <p className="text-gray-200 mb-4">
+            SuggestFlix is built and maintained by a passionate team of movie lovers and developers. We are dedicated to providing a seamless and enjoyable experience for our users. Your feedback and suggestions help us improve and grow.
+          </p>
+          <h2 className="text-2xl font-semibold text-white mb-4">Join Us</h2>
+          <p className="text-gray-200">
+            We are always looking for ways to make SuggestFlix better. If you have ideas, feedback, or want to contribute, feel free to reach out via our Contact page. Happy watching!
+          </p>
+        </motion.div>
       </div>
     </div>
   );

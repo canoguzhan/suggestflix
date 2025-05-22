@@ -11,6 +11,7 @@ import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import TermsPage from "@/pages/terms";
+import BlogPage from "@/pages/blog";
 import Layout from "@/components/layout";
 import { trackPageView } from "@/lib/analytics";
 
@@ -30,6 +31,7 @@ function Router() {
         <Route path="/contact" component={ContactPage} />
         <Route path="/privacy-policy" component={PrivacyPolicyPage} />
         <Route path="/terms" component={TermsPage} />
+        <Route path="/blog" component={BlogPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
