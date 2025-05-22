@@ -4,27 +4,15 @@ import { useLanguageStore } from "./localization";
 // Query configuration for fetching a random movie
 export const randomMovieQuery = () => {
   const language = useLanguageStore.getState().language;
-  const timestamp = Date.now();
   return {
-    queryKey: ["/api/movies/random", language, timestamp],
+    queryKey: ["/api/movies/random", language],
     queryFn: async () => {
-      const res = await fetch(`/api/movies/random?language=${language}&t=${timestamp}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const res = await fetch(`/api/movies/random?language=${language}`);
       if (!res.ok) {
         throw new Error("Failed to fetch random movie");
       }
       return res.json();
-    },
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false
+    }
   };
 };
 
