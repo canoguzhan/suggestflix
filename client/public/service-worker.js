@@ -102,6 +102,7 @@ const isCacheable = (request) => {
     request.method === 'GET' &&
     !url.pathname.includes('/api/auth/') &&
     !url.pathname.includes('/api/user/') &&
+    !url.pathname.includes('/api/movies/random') &&
     !url.searchParams.has('nocache')
   );
 };
@@ -110,6 +111,11 @@ const isCacheable = (request) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
+
+  // Completely bypass the random movie endpoint
+  if (url.pathname.includes('/api/movies/random')) {
+    return;
+  }
 
   // Skip non-GET requests and non-cacheable requests
   if (!isCacheable(request)) {
