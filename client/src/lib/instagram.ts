@@ -16,6 +16,12 @@ interface InstagramResponse {
     };
     next?: string;
   };
+  error?: {
+    message: string;
+    type: string;
+    code: number;
+    fbtrace_id: string;
+  };
 }
 
 const INSTAGRAM_API_URL = 'https://graph.facebook.com/v18.0/me/media';
@@ -23,25 +29,42 @@ const INSTAGRAM_ACCESS_TOKEN = (import.meta as unknown as { env: { VITE_INSTAGRA
 
 export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramPost[]> {
   if (!INSTAGRAM_ACCESS_TOKEN) {
-    console.warn('Instagram access token not found. Using dummy data instead.');
+    console.error('Instagram access token is undefined or empty');
     return getDummyPosts();
   }
 
+  if (!INSTAGRAM_ACCESS_TOKEN.startsWith('EAA')) {
+    console.error('Instagram access token format appears invalid (should start with EAA)');
+    return getDummyPosts();
+  }
+
+  console.log('Token validation passed. Length:', INSTAGRAM_ACCESS_TOKEN.length);
   console.log('Attempting to fetch Instagram posts with token:', INSTAGRAM_ACCESS_TOKEN.substring(0, 10) + '...');
+
   try {
     const url = `${INSTAGRAM_API_URL}?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
     console.log('Fetching from URL:', url.replace(INSTAGRAM_ACCESS_TOKEN, '***'));
     const response = await fetch(url);
 
     console.log('Response status:', response.status);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Instagram API Error:', errorData);
-      console.error('Full error response:', JSON.stringify(errorData, null, 2));
-      throw new Error(`Failed to fetch Instagram posts: ${errorData.error?.message || 'Unknown error'}`);
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+
+    let data: InstagramResponse;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse response as JSON:', e);
+      throw new Error('Invalid JSON response from Instagram API');
     }
 
-    const data: InstagramResponse = await response.json();
+    if (!response.ok || data.error) {
+      const errorData = data.error;
+      console.error('Instagram API Error:', errorData);
+      console.error('Full error response:', JSON.stringify(errorData, null, 2));
+      throw new Error(`Failed to fetch Instagram posts: ${errorData?.message || 'Unknown error'}`);
+    }
+
     console.log('Instagram API Response:', JSON.stringify(data, null, 2));
     if (!data.data || data.data.length === 0) {
       console.warn('No Instagram posts found. Using dummy data instead.');
