@@ -29,7 +29,7 @@ const INSTAGRAM_API_BASE = 'https://graph.facebook.com/v18.0';
 const INSTAGRAM_ACCOUNT_ID = (import.meta as unknown as { env: { VITE_INSTAGRAM_ACCOUNT_ID?: string } }).env.VITE_INSTAGRAM_ACCOUNT_ID;
 const INSTAGRAM_ACCESS_TOKEN = (import.meta as unknown as { env: { VITE_INSTAGRAM_ACCESS_TOKEN?: string } }).env.VITE_INSTAGRAM_ACCESS_TOKEN;
 
-export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramPost[]> {
+export async function fetchInstagramPosts(): Promise<InstagramPost[]> {
   if (!INSTAGRAM_ACCESS_TOKEN) {
     console.error('Instagram access token is undefined or empty');
     return getDummyPosts();
@@ -49,7 +49,7 @@ export async function fetchInstagramPosts(limit: number = 6): Promise<InstagramP
   console.log('Attempting to fetch Instagram posts with token:', INSTAGRAM_ACCESS_TOKEN.substring(0, 10) + '...');
 
   try {
-    const url = `${INSTAGRAM_API_BASE}/${INSTAGRAM_ACCOUNT_ID}/media?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+    const url = `${INSTAGRAM_API_BASE}/${INSTAGRAM_ACCOUNT_ID}/media?fields=id,media_url,caption,permalink,timestamp,media_type,thumbnail_url&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
     console.log('Fetching from URL:', url.replace(INSTAGRAM_ACCESS_TOKEN, '***'));
     const response = await fetch(url);
 
