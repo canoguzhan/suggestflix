@@ -298,6 +298,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get movie by ID
+  app.get('/api/movies/:id', async (req: Request, res: Response) => {
+    try {
+      const movieId = parseInt(req.params.id, 10);
+      if (isNaN(movieId)) {
+        return res.status(400).json({ message: "Invalid movie ID" });
+      }
+
+      // Get language from request (default to 'en')
+      const language = req.query.language || 'en';
+
+      // Fetch movie details from TMDB
+      const detailsResponse = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=${language}`
+      );
+
+      if (!detailsResponse.ok) {
+        if (detailsResponse.status === 404) {
+          return res.status(404).json({ message: "Movie not found" });
+        }
+        throw new Error(`TMDB API error: ${detailsResponse.status}`);
+      }
+
+      // Fetch watch providers
+      const watchProvidersResponse = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${TMDB_API_KEY}&language=${language}`
+      );
+
+      let watchProviders = { results: {} };
+      if (watchProvidersResponse.ok) {
+        watchProviders = await watchProvidersResponse.json();
+      }
+
+      const movieDetails = await detailsResponse.json();
+
+      // Combine movie details with watch providers
+      const movieWithProviders = {
+        ...movieDetails,
+        watch_providers: watchProviders
+      };
+
+      // Parse and validate the movie data
+      const validatedMovie = tmdbMovieSchema.parse(movieWithProviders);
+
+      // Get or create the movie in our database
+      let storedMovie = await storage.getMovieByTmdbId(validatedMovie.id);
+
+      if (!storedMovie) {
+        const movieToInsert = insertMovieSchema.parse({
+          tmdbId: validatedMovie.id,
+          title: validatedMovie.title,
+          posterPath: validatedMovie.poster_path,
+          releaseDate: validatedMovie.release_date,
+          overview: validatedMovie.overview,
+          voteAverage: validatedMovie.vote_average.toString()
+        });
+
+        storedMovie = await storage.createMovie(movieToInsert);
+      }
+
+      // Return the TMDB movie with additional fields
+      return res.status(200).json({
+        ...validatedMovie,
+        favorite: await storage.isFavorite(storedMovie.id),
+        storedId: storedMovie.id
+      });
+    } catch (error) {
+      console.error("Error fetching movie:", error);
+      return res.status(500).json({ 
+        message: "Failed to fetch movie", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
