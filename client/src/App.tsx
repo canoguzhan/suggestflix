@@ -7,6 +7,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Favorites from "@/pages/favorites";
+import AboutPage from "@/pages/about";
+import ContactPage from "@/pages/contact";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
+import TermsPage from "@/pages/terms";
 import Layout from "@/components/layout";
 import { trackPageView } from "@/lib/analytics";
 
@@ -22,6 +26,10 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/favorites" component={Favorites} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/contact" component={ContactPage} />
+        <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+        <Route path="/terms" component={TermsPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
