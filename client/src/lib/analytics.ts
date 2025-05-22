@@ -6,6 +6,7 @@ export const AnalyticsEvent = {
   'movie_unfavorite': 'movie_unfavorite',
   'movie_search': 'movie_search',
   'movie_random': 'movie_random',
+  'movie_share': 'movie_share',
   
   // Navigation events
   'page_view': 'page_view',
@@ -24,10 +25,24 @@ export interface AnalyticsParams {
   [key: string]: string | number | boolean | undefined;
 }
 
-// Analytics event tracking function
-export function trackEvent(eventName: keyof typeof AnalyticsEvent, params?: AnalyticsParams) {
+type AnalyticsEventType = typeof AnalyticsEvent[keyof typeof AnalyticsEvent];
+
+interface AnalyticsEventProperties {
+  movie_id?: number;
+  movie_title?: string;
+  platform?: string;
+  timestamp?: string;
+  provider?: string;
+  query?: string;
+  page?: string;
+  theme?: string;
+  language?: string;
+  [key: string]: any;
+}
+
+export function trackEvent(event: { name: AnalyticsEventType; properties: AnalyticsEventProperties }) {
   if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', eventName, params);
+    window.gtag('event', event.name, event.properties);
   }
 }
 
@@ -43,64 +58,101 @@ export function trackPageView(url: string) {
 
 // Movie view tracking
 export function trackMovieView(movieId: number, movieTitle: string) {
-  trackEvent('movie_view', {
-    movie_id: movieId,
-    movie_title: movieTitle,
+  trackEvent({
+    name: AnalyticsEvent.movie_view,
+    properties: {
+      movie_id: movieId,
+      movie_title: movieTitle,
+    }
   });
 }
 
 // Movie favorite tracking
 export function trackMovieFavorite(movieId: number, movieTitle: string) {
-  trackEvent('movie_favorite', {
-    movie_id: movieId,
-    movie_title: movieTitle,
+  trackEvent({
+    name: AnalyticsEvent.movie_favorite,
+    properties: {
+      movie_id: movieId,
+      movie_title: movieTitle,
+    }
   });
 }
 
 // Movie unfavorite tracking
 export function trackMovieUnfavorite(movieId: number, movieTitle: string) {
-  trackEvent('movie_unfavorite', {
-    movie_id: movieId,
-    movie_title: movieTitle,
+  trackEvent({
+    name: AnalyticsEvent.movie_unfavorite,
+    properties: {
+      movie_id: movieId,
+      movie_title: movieTitle,
+    }
   });
 }
 
 // Movie search tracking
 export function trackMovieSearch(query: string, resultCount: number) {
-  trackEvent('movie_search', {
-    search_query: query,
-    result_count: resultCount,
+  trackEvent({
+    name: AnalyticsEvent.movie_search,
+    properties: {
+      search_query: query,
+      result_count: resultCount,
+    }
   });
 }
 
 // Random movie tracking
 export function trackRandomMovie(movieId: number, movieTitle: string) {
-  trackEvent('movie_random', {
-    movie_id: movieId,
-    movie_title: movieTitle,
+  trackEvent({
+    name: AnalyticsEvent.movie_random,
+    properties: {
+      movie_id: movieId,
+      movie_title: movieTitle,
+    }
   });
 }
 
 // Theme toggle tracking
 export function trackThemeToggle(theme: 'light' | 'dark') {
-  trackEvent('theme_toggle', {
-    theme,
+  trackEvent({
+    name: AnalyticsEvent.theme_toggle,
+    properties: {
+      theme,
+    }
   });
 }
 
 // Language change tracking
 export function trackLanguageChange(language: string) {
-  trackEvent('language_change', {
-    language,
+  trackEvent({
+    name: AnalyticsEvent.language_change,
+    properties: {
+      language,
+    }
   });
 }
 
 // Streaming click tracking
 export function trackStreamingClick(provider: string, movieId: number, movieTitle: string) {
-  trackEvent('streaming_click', {
-    provider,
-    movie_id: movieId,
-    movie_title: movieTitle,
+  trackEvent({
+    name: AnalyticsEvent.streaming_click,
+    properties: {
+      provider,
+      movie_id: movieId,
+      movie_title: movieTitle,
+    }
+  });
+}
+
+// Movie share tracking
+export function trackMovieShare(movieId: number, movieTitle: string, platform: string) {
+  trackEvent({
+    name: AnalyticsEvent.movie_share,
+    properties: {
+      movie_id: movieId,
+      movie_title: movieTitle,
+      platform: platform,
+      timestamp: new Date().toISOString()
+    }
   });
 }
 

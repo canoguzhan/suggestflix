@@ -1,13 +1,14 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Heart, HeartOff } from "lucide-react";
+import { ExternalLink, Heart, HeartOff, Share2 } from "lucide-react";
 import { TmdbMovie } from "@shared/schema";
 import { useTranslation } from "@/lib/localization";
 import StreamingLinks from "@/components/streaming-links";
 import { useFavorites } from "@/hooks/use-favorites";
 import { getTmdbMovieUrl } from "@/lib/tmdb";
-import { trackMovieFavorite, trackMovieUnfavorite, trackStreamingClick } from "@/lib/analytics";
+import { trackMovieFavorite, trackMovieUnfavorite, trackStreamingClick, trackMovieShare } from "@/lib/analytics";
+import SocialShare from "@/components/social-share";
 
 interface MovieCardProps {
   movie: TmdbMovie & { storedId: number };
@@ -34,6 +35,10 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
   const handleStreamingClick = (provider: string) => {
     trackStreamingClick(provider, movie.id, movie.title);
+  };
+
+  const handleShare = (platform: string) => {
+    trackMovieShare(movie.id, movie.title, platform);
   };
 
   return (
@@ -70,6 +75,14 @@ export default function MovieCard({ movie }: MovieCardProps) {
                 )}
               </div>
               <div className="flex gap-2">
+                <SocialShare
+                  movieTitle={movie.title}
+                  movieId={movie.id}
+                  movieUrl={`${window.location.origin}/movie/${movie.id}`}
+                  moviePoster={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  onShare={handleShare}
+                  className="mr-2"
+                />
                 <Button
                   variant="ghost"
                   size="icon"
