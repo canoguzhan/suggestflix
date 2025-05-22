@@ -68,8 +68,8 @@
 /* Dark mode optimizations */
 @media (prefers-color-scheme: dark) {
   .dark-mode-optimized {
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
+    background-color: transparent;
+    backdrop-filter: none;
   }
 }
 
