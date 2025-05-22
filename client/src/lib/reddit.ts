@@ -10,14 +10,14 @@ export interface RedditPost {
 
 export async function fetchRedditPosts(): Promise<RedditPost[]> {
   try {
-    const response = await fetch('https://www.reddit.com/r/movies/.rss');
+    const response = await fetch('/api/reddit/rss');
     if (!response.ok) {
       throw new Error(`Failed to fetch Reddit RSS feed: ${response.status}`);
     }
 
-    const text = await response.text();
+    const { feed } = await response.json();
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, 'text/xml');
+    const xmlDoc = parser.parseFromString(feed, 'text/xml');
 
     // Get all item elements (posts)
     const items = xmlDoc.getElementsByTagName('item');

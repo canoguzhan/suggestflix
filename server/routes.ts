@@ -373,6 +373,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Reddit RSS feed
+  app.get('/api/reddit/rss', async (req: Request, res: Response) => {
+    try {
+      const response = await fetch('https://www.reddit.com/r/movies/.rss');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Reddit RSS feed: ${response.status}`);
+      }
+
+      const text = await response.text();
+      res.setHeader('Content-Type', 'application/json');
+      res.json({ feed: text });
+    } catch (error) {
+      console.error('Error fetching Reddit RSS feed:', error);
+      res.status(500).json({ 
+        message: "Failed to fetch Reddit RSS feed", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
