@@ -382,47 +382,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get Reddit RSS feed
   app.get('/api/reddit/rss', async (req: Request, res: Response) => {
     console.log('Reddit RSS endpoint hit');
-    console.log('Request headers:', req.headers);
     
     try {
       console.log('Fetching Reddit RSS feed...');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      const response = await fetch('https://www.reddit.com/r/movies/.rss', {
+      // Try the JSON feed first (more reliable)
+      const response = await fetch('https://www.reddit.com/r/movies/hot.json?limit=10', {
         headers: {
           'User-Agent': 'SuggestFlix/1.0 (https://suggestflix.com)',
-          'Accept': 'application/rss+xml, application/xml, text/xml'
+          'Accept': 'application/json'
         },
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
-      console.log('Reddit RSS response status:', response.status);
-      console.log('Reddit RSS response headers:', response.headers);
+      console.log('Reddit response status:', response.status);
       
       if (!response.ok) {
-        console.error('Reddit RSS feed error:', response.status, response.statusText);
-        throw new Error(`Failed to fetch Reddit RSS feed: ${response.status} ${response.statusText}`);
+        console.error('Reddit feed error:', response.status, response.statusText);
+        throw new Error(`Failed to fetch Reddit feed: ${response.status} ${response.statusText}`);
       }
 
-      const text = await response.text();
-      console.log('Reddit RSS feed length:', text.length);
-      console.log('First 100 characters of feed:', text.substring(0, 100));
+      const data = await response.json();
+      console.log('Reddit response data type:', typeof data);
+      console.log('Reddit response has data:', !!data?.data?.children);
       
-      if (!text.includes('<?xml') || !text.includes('<rss')) {
-        console.error('Invalid RSS feed format received');
-        throw new Error('Invalid RSS feed format');
+      if (!data?.data?.children) {
+        throw new Error('Invalid Reddit response format');
       }
-      
+
+      // Convert Reddit JSON to RSS-like format
+      const posts = data.data.children.map((post: any) => {
+        const { data: postData } = post;
+        return {
+          title: postData.title,
+          link: `https://reddit.com${postData.permalink}`,
+          author: postData.author,
+          published: new Date(postData.created_utc * 1000).toISOString(),
+          content: postData.selftext || postData.title,
+          thumbnail: postData.thumbnail && postData.thumbnail.startsWith('http') ? postData.thumbnail : undefined
+        };
+      });
+
+      // Convert to XML format
+      const xmlFeed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>r/movies</title>
+    <link>https://www.reddit.com/r/movies</link>
+    ${posts.map(post => `
+    <item>
+      <title><![CDATA[${post.title}]]></title>
+      <link>${post.link}</link>
+      <dc:creator>${post.author}</dc:creator>
+      <pubDate>${post.published}</pubDate>
+      <description><![CDATA[${post.content}]]></description>
+      ${post.thumbnail ? `<media:thumbnail url="${post.thumbnail}"/>` : ''}
+    </item>`).join('')}
+  </channel>
+</rss>`;
+
       res.setHeader('Content-Type', 'application/json');
-      res.json({ feed: text });
+      res.json({ feed: xmlFeed });
     } catch (error) {
-      console.error('Error fetching Reddit RSS feed:', error);
+      console.error('Error fetching Reddit feed:', error);
       if (error instanceof Error) {
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
       }
       
       // Return dummy data instead of error
@@ -430,6 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 <rss version="2.0">
   <channel>
     <title>r/movies</title>
+    <link>https://www.reddit.com/r/movies</link>
     <item>
       <title>Discussion: What's your favorite movie of 2024 so far?</title>
       <link>https://www.reddit.com/r/movies/comments/example1</link>
