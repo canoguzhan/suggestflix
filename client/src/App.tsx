@@ -12,6 +12,7 @@ import ContactPage from "@/pages/contact";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import TermsPage from "@/pages/terms";
 import BlogPage from "@/pages/blog";
+import MoviePage from "@/pages/movie";
 import Layout from "@/components/layout";
 import { trackPageView } from "@/lib/analytics";
 
@@ -32,6 +33,7 @@ function Router() {
         <Route path="/privacy-policy" component={PrivacyPolicyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/blog" component={BlogPage} />
+        <Route path="/movie/:id" component={MoviePage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
